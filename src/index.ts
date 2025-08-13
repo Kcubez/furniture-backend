@@ -1,5 +1,6 @@
-import { log } from 'console';
-import express from 'express';
+import { app } from './app';
+import 'dotenv/config';
 
-const app = express();
-app.listen(8080, () => log('Server is running on port 8080'));
+const PORT = process.env.PORT;
+
+app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
