@@ -8,6 +8,8 @@
 8. npm i @types/bcrypt @types/compression @types/jsonwebtoken @types/multer --save-dev
 
 
+npm install @faker-js/faker
+
 ***
 https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string
 

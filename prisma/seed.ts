@@ -1,35 +1,48 @@
 import { PrismaClient, Prisma } from '../src/generated/prisma';
 import * as bcrypt from 'bcrypt';
+import { faker } from '@faker-js/faker';
 
 const prisma = new PrismaClient();
 
-const userData: Prisma.UserCreateInput[] = [
-  {
-    phone: '1234567890',
+// const userData: Prisma.UserCreateInput[] = [
+//   {
+//     phone: '1234567890',
+//     password: '',
+//     randToken: 'a;jvro[fjeai;janve93',
+//   },
+//   {
+//     phone: '1234567891',
+//     password: '',
+//     randToken: 'a;jvro[fjeai;janve93',
+//   },
+//   {
+//     phone: '1234567892',
+//     password: '',
+//     randToken: 'a;jvro[fjeai;janve93',
+//   },
+//   {
+//     phone: '1234567893',
+//     password: '',
+//     randToken: 'a;jvro[fjeai;janve93',
+//   },
+//   {
+//     phone: '1234567894',
+//     password: '',
+//     randToken: 'a;jvro[fjeai;janve93',
+//   },
+// ];
+
+export function createRandomUser() {
+  return {
+    phone: faker.phone.number({ style: 'international' }),
     password: '',
-    randToken: 'a;jvro[fjeai;janve93',
-  },
-  {
-    phone: '1234567891',
-    password: '',
-    randToken: 'a;jvro[fjeai;janve93',
-  },
-  {
-    phone: '1234567892',
-    password: '',
-    randToken: 'a;jvro[fjeai;janve93',
-  },
-  {
-    phone: '1234567893',
-    password: '',
-    randToken: 'a;jvro[fjeai;janve93',
-  },
-  {
-    phone: '1234567894',
-    password: '',
-    randToken: 'a;jvro[fjeai;janve93',
-  },
-];
+    randToken: faker.string.alphanumeric(20),
+  };
+}
+
+export const userData = faker.helpers.multiple(createRandomUser, {
+  count: 5,
+});
 
 async function main() {
   console.log('Seeding database...');
