@@ -8,7 +8,7 @@
 8. npm i @types/bcrypt @types/compression @types/jsonwebtoken @types/multer --save-dev
 
 
-npm install @faker-js/faker
+npm install @faker-js/faker -D
 
 ***
 https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string
@@ -21,9 +21,17 @@ npx prisma migrate dev --name init
 npm install @prisma/client
 npx prisma generate
 npx prisma db push
+npx prisma db pull
 
 npx prisma migrate dev --create-only  --name init
+npx prisma migrate reset
 
+npx prisma migrate diff \
+--from-empty \
+--to-schema-datamodel prisma/schema.prisma \
+--script > prisma/migrations/0_init/migration.sql
+
+npx prisma migrate resolve --applied 0_init
 
 
 bullMQ , Redis , ioredis
