@@ -11,6 +11,7 @@ export const app = express();
 
 // Logging
 app.use(morgan('dev')); // Logging (see all requests in console)
+
 // Body parsers
 app.use(express.urlencoded({ extended: true })); // For form data
 app.use(express.json()); // For JSON data
