@@ -33,6 +33,7 @@ npx prisma migrate diff \
 
 npx prisma migrate resolve --applied 0_init
 
+npm i ejs
 
 bullMQ , Redis , ioredis
 ( Queue , Job, Worker )
