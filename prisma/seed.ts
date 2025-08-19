@@ -32,6 +32,7 @@ const prisma = new PrismaClient();
 //   },
 // ];
 
+// Function to create a random user
 export function createRandomUser() {
   return {
     phone: faker.phone.number({ style: 'international' }),

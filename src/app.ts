@@ -5,9 +5,10 @@ import cors from 'cors';
 import morgan from 'morgan';
 import { limiter } from './middlewares/rateLimiter';
 import healthRoutes from './routes/v1/health';
+import authRoutes from './routes/v1/auth';
 import { Request, Response, NextFunction } from 'express';
 import viewRoutes from './routes/v1/web/view';
-import * as errorController from './controllers/web/errorController';
+// import * as errorController from './controllers/web/errorController';
 
 export const app = express();
 
@@ -36,7 +37,9 @@ app.use(express.static('public')); // Serve static files from 'public' directory
 // Routes
 app.use('/api/v1', healthRoutes);
 app.use(viewRoutes);
-app.use(errorController.notFound); // Handle 404 errors
+// app.use(errorController.notFound); // Handle 404 errors
+
+app.use('/api/v1', authRoutes);
 
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

@@ -7,6 +7,8 @@
 7. npm i bcrypt compression express-rate-limit express-validator jsonwebtoken multer
 8. npm i @types/bcrypt @types/compression @types/jsonwebtoken @types/multer --save-dev
 
+ npm i moment crypto
+
 
 npm install @faker-js/faker -D
 
@@ -34,6 +36,8 @@ npx prisma migrate diff \
 npx prisma migrate resolve --applied 0_init
 
 npm i ejs
+
+
 
 bullMQ , Redis , ioredis
 ( Queue , Job, Worker )

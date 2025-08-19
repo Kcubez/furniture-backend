@@ -28,22 +28,22 @@ model Order {
   code             String             @db.VarChar(15)
   totalPrice       Decimal            @db.Decimal(10, 2)
   createdAt        DateTime           @default(now())
-  updatedAt        DateTime
+  updatedAt        DateTime           @updatedAt
   user             User               @relation(fields: [userId], references: [id])
   products ProductsOnOrders[]
 }
 
 model Otp {
   id            Int      @id(map: "otp_pkey") @default(autoincrement())
-  phone         String   @db.VarChar(15)
-  otp           String   @db.VarChar(6)
+  phone         String   @unique   @db.VarChar(15)
+  otp           String   
   rememberToken String
   verifyToken   String?
   count         Int      @default(0) @db.SmallInt
   error         Int      @default(0) @db.SmallInt
   rating        Int      @default(0) @db.SmallInt
   createdAt     DateTime @default(now())
-  updatedAt     DateTime
+  updatedAt     DateTime @updatedAt
 }
 
 model Post {
@@ -56,7 +56,7 @@ model Post {
   categoryId Int
   typeId     Int
   createdAt  DateTime @default(now())
-  updatedAt  DateTime
+  updatedAt  DateTime   @updatedAt
   user       User     @relation(fields: [authorId], references: [id])
   category   Category @relation(fields: [categoryId], references: [id])
   type       Type     @relation(fields: [typeId], references: [id])
@@ -74,7 +74,7 @@ model Product {
   categoryId       Int
   typeId           Int
   createdAt        DateTime           @default(now())
-  updatedAt        DateTime
+  updatedAt        DateTime           @updatedAt
   images            Image[]
   category         Category           @relation(fields: [categoryId], references: [id])
   type             Type               @relation(fields: [typeId], references: [id])
@@ -126,7 +126,7 @@ model User {
   randToken       String
   image           String?
   createdAt       DateTime  @default(now())
-  updatedAt       DateTime
+  updatedAt       DateTime  @updatedAt
   orders          Order[]
   posts           Post[]
 }
