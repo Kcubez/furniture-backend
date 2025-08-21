@@ -1,10 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { body, check, validationResult } from 'express-validator';
 import bcrypt from 'bcrypt';
+import moment from 'moment';
 
 import { getUserByPhone, createOtp, getOtpByPhone, updateOtp } from '../services/authService';
 import { checkOtpErrorIfSameDate, checkUserExists, checkOtpRow } from '../utils/auth';
 import { generateOTP, generateToken } from '../utils/generate';
+import { count } from 'console';
 
 /**
  * Controller for handling authentication-related requests.
@@ -128,22 +130,62 @@ export const verifyOtp = [
     const isSameDate = lastOtpVerify === today;
     checkOtpErrorIfSameDate(isSameDate, otpRow!.error);
 
-    let result;
-
+    // Otp is wrong
     if (otpRow?.rememberToken !== token) {
       const otpData = {
         error: 5,
       };
-      result = await updateOtp(otpRow!.id, otpData); // Update OTP row with error count
+      await updateOtp(otpRow!.id, otpData); // Update OTP row with error count
       const error: any = new Error('Token is invalid');
       error.status = 401; // Unauthorized
       error.code = 'INVALID_TOKEN';
     }
 
+    //Otp is expired
+    const isOtpExpired = moment().diff(otpRow?.updatedAt, 'minutes') > 2; // Check if OTP is older than 2 minutes
+    if (isOtpExpired) {
+      const error: any = new Error('OTP is expired');
+      error.status = 403;
+      error.code = 'OTP_EXPIRED';
+      return next(error); // This passes the error to Express
+    }
+
+    const isMatchOtp = await bcrypt.compare(otp, otpRow!.otp); // Compare the provided OTP with the stored hash
+    // If OTP does not match
+    if (!isMatchOtp) {
+      // If OTP error is first time today
+      if (isSameDate) {
+        const otpData = {
+          error: 1,
+        };
+        await updateOtp(otpRow!.id, otpData); // Update OTP row with error count
+      } else {
+        //If OTP error is not first time today
+        const otpData = {
+          error: { increment: 1 },
+        };
+        await updateOtp(otpRow!.id, otpData);
+      }
+      const error: any = new Error('OTP is incorrect');
+      error.status = 401;
+      error.code = 'OTP_INVALID';
+      return next(error); // This passes the error to Express
+    }
+
+    // If OTP matches,
+    const verifyToken = generateToken(); // Generate a new token for the user
+    const otpData = {
+      verifyToken,
+      error: 0,
+      count: 1,
+    };
+
+    const result = await updateOtp(otpRow!.id, otpData); // Update OTP row with verification token and reset error count
+
     res.status(200).json({
       message: 'OTP verification successful',
-      phone: req.body.phone,
-      token: req.body.token,
+      phone: result.phone,
+      token: result.verifyToken,
     });
   },
 ];
