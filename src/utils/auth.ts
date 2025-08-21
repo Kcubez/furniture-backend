@@ -24,3 +24,12 @@ export const checkOtpRow = (otpRow: any) => {
     throw error; // This will be caught by the error handling middleware
   }
 };
+
+export const chechUserIfNotExists = (user: any) => {
+  if (!user) {
+    const error: any = new Error('User not found with this phone number');
+    error.status = 401; // Unauthorized
+    error.code = 'USER_NOT_FOUND';
+    throw error; // This will be caught by the error handling middleware
+  }
+};
