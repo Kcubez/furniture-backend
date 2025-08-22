@@ -1,4 +1,4 @@
-import e, { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { body, validationResult } from 'express-validator';
 import bcrypt from 'bcrypt';
 import moment from 'moment';
@@ -11,12 +11,13 @@ import {
   updateOtp,
   createUser,
   updateUser,
+  getUserById,
 } from '../services/authService';
 import {
   checkOtpErrorIfSameDate,
   checkUserExists,
   checkOtpRow,
-  chechUserIfNotExists,
+  checkUserIfNotExists,
 } from '../utils/auth';
 import { generateOTP, generateToken } from '../utils/generate';
 import { error } from 'console';
@@ -288,7 +289,7 @@ export const confirmPassword = [
     };
 
     const accessToken = jwt.sign(accessTokenPayload, process.env.ACCESS_TOKEN_SECRET!, {
-      expiresIn: '15m', // Access token expires in 15 minutes
+      expiresIn: 60 * 15, // Access token expires in 15 minutes
     });
 
     const refreshToken = jwt.sign(refreshTokenPayload, process.env.REFRESH_TOKEN_SECRET!, {
@@ -351,7 +352,7 @@ export const login = [
       phone = phone.substring(2, phone.length); // Remove the first two characters if they are '09'
     }
     const user = await getUserByPhone(phone); // Check if user exists
-    chechUserIfNotExists(user); // Custom function to check if user exists
+    checkUserIfNotExists(user); // Custom function to check if user exists
 
     // If Password was over limit
     if (user?.status === 'FREEZE') {
@@ -407,7 +408,7 @@ export const login = [
     };
 
     const accessToken = jwt.sign(accessTokenPayload, process.env.ACCESS_TOKEN_SECRET!, {
-      expiresIn: '15m', // Access token expires in 15 minutes
+      expiresIn: 60 * 15, // Access token expires in 15 minutes
     });
 
     const refreshToken = jwt.sign(refreshTokenPayload, process.env.REFRESH_TOKEN_SECRET!, {
@@ -440,3 +441,46 @@ export const login = [
       });
   },
 ];
+
+// Logout user by clearing cookies
+export const logout = async (req: Request, res: Response, next: NextFunction) => {
+  // clear HttpOnly cookies
+  // update randToken in User table
+  const refreshToken = req.cookies ? req.cookies.refreshToken : null;
+  if (!refreshToken) {
+    const error: any = new Error('You are not authenticated.');
+    error.status = 401; // Unauthorized
+    error.code = 'UNAUTHORIZED';
+    return next(error); // This passes the error to Express
+  }
+  let decodedToken;
+  try {
+    decodedToken = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET!) as {
+      id: number;
+      phone: string;
+    };
+  } catch (err) {
+    const error: any = new Error('Invalid Refresh Token');
+    error.status = 400; // Bad Request
+    error.code = 'ERROR_INVALID_REFRESH_TOKEN';
+    return next(error); // This passes the error to Express
+  }
+  const user = await getUserById(decodedToken.id); // Get user by ID from the decoded token
+  checkUserIfNotExists(user); // Check if user exists
+
+  if (user!.phone !== decodedToken.phone) {
+    const error: any = new Error('You are not authenticated.');
+    error.status = 401; // Unauthorized
+    error.code = 'ERROR_UNAUTHORIZED';
+    return next(error); // This passes the error to Express
+  }
+  const userData = {
+    randToken: generateToken(), // Generate a new token for the user
+  };
+  await updateUser(user!.id, userData); // Update user with new token
+
+  res.clearCookie('accessToken');
+  res.clearCookie('refreshToken'); // Clear cookies
+
+  res.status(200).json({ message: 'Logout successful.' });
+};

@@ -8,6 +8,8 @@
 8. npm i @types/bcrypt @types/compression @types/jsonwebtoken @types/multer --save-dev
 
  npm i moment crypto
+ npm install cookie-parser 
+ npm i @types/cookie-parser 
 
 
 npm install @faker-js/faker -D

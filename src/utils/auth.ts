@@ -25,7 +25,7 @@ export const checkOtpRow = (otpRow: any) => {
   }
 };
 
-export const chechUserIfNotExists = (user: any) => {
+export const checkUserIfNotExists = (user: any) => {
   if (!user) {
     const error: any = new Error('User not found with this phone number');
     error.status = 401; // Unauthorized

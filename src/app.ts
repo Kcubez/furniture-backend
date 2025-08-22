@@ -3,17 +3,36 @@ import helmet from 'helmet';
 import compression from 'compression';
 import cors from 'cors';
 import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
 import { limiter } from './middlewares/rateLimiter';
+import { auth } from './middlewares/auth';
 import healthRoutes from './routes/v1/health';
 import authRoutes from './routes/v1/auth';
 import { Request, Response, NextFunction } from 'express';
 import viewRoutes from './routes/v1/web/view';
 // import * as errorController from './controllers/web/errorController';
+import userRoutes from './routes/v1/admin/user';
 
 export const app = express();
 
 app.set('view engine', 'ejs'); // Set view engine to EJS
 app.set('views', './src/views'); // Set views directory
+
+var whitelist = ['http://example1.com', 'http://localhost:5173']; // Replace with your allowed origins
+var corsOptions = {
+  origin: function (origin: any, callback: (err: Error | null, origin?: any) => void) {
+    if (!origin) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      return callback(null, true);
+    }
+    if (whitelist.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true, // Allow credentials (cookies, authorization headers, etc.)
+};
 
 // Logging
 app.use(morgan('dev')); // Logging (see all requests in console)
@@ -22,8 +41,11 @@ app.use(morgan('dev')); // Logging (see all requests in console)
 app.use(express.urlencoded({ extended: true })); // For form data
 app.use(express.json()); // For JSON data
 
+// Cookie parser
+app.use(cookieParser()); // Parse cookies
+
 // CORS
-app.use(cors()); // Allow all origins
+app.use(cors(corsOptions)); // Allow all origins
 
 // Security & performance
 app.use(helmet()); // Security headers
@@ -40,6 +62,7 @@ app.use(viewRoutes);
 // app.use(errorController.notFound); // Handle 404 errors
 
 app.use('/api/v1', authRoutes);
+app.use('/api/v1/admins', auth, userRoutes);
 
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
