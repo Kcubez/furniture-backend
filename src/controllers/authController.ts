@@ -392,7 +392,7 @@ export const login = [
         }
       }
       // Ending
-      const error: any = new Error('Phone number or password is incorrect');
+      const error: any = new Error(req.t('wrongPassword'));
       error.status = 401; // Unauthorized
       error.code = errorCode.invalid;
       return next(error); // This passes the error to Express
@@ -470,6 +470,14 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
     error.code = errorCode.unauthenticated;
     return next(error); // This passes the error to Express
   }
+
+  if (isNaN(decodedToken.id)) {
+    const error: any = new Error('Your are not authenticated.');
+    error.status = 401; // Unauthorized
+    error.code = errorCode.unauthenticated;
+    return next(error);
+  }
+
   const user = await getUserById(decodedToken.id); // Get user by ID from the decoded token
   checkUserIfNotExists(user); // Check if user exists
 

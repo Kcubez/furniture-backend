@@ -42,6 +42,13 @@ export const auth = (req: CustomRequest, res: Response, next: NextFunction) => {
       return next(err);
     }
 
+    if (isNaN(decodedRefreshToken.id)) {
+      const error: any = new Error('Your are not authenticated.');
+      error.status = 401; // Unauthorized
+      error.code = errorCode.unauthenticated;
+      return next(error);
+    }
+
     const user = await getUserById(decodedRefreshToken.id);
     if (!user) {
       const error: any = new Error('This account has not registered.');
@@ -114,7 +121,13 @@ export const auth = (req: CustomRequest, res: Response, next: NextFunction) => {
     let decodedToken;
     try {
       decodedToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET!) as { id: number };
-      req.userId = decodedToken!.id;
+      if (isNaN(decodedToken.id)) {
+        const error: any = new Error('Your are not authenticated.');
+        error.status = 401; // Unauthorized
+        error.code = errorCode.unauthenticated;
+        return next(error);
+      }
+      req.userId = decodedToken.id;
       next();
     } catch (error: any) {
       if (error.name === 'TokenExpiredError') {

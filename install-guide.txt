@@ -11,6 +11,7 @@
  npm install cookie-parser 
  npm i @types/cookie-parser 
 
+npm i i18next i18next-http-middleware i18next-fs-backend
 
 npm install @faker-js/faker -D
 

@@ -12,6 +12,11 @@ import { Request, Response, NextFunction } from 'express';
 import viewRoutes from './routes/v1/web/view';
 // import * as errorController from './controllers/web/errorController';
 import userRoutes from './routes/v1/admin/user';
+import profileRoutes from './routes/v1/api/user';
+import i18next from 'i18next';
+import Backend from 'i18next-fs-backend';
+import middleware from 'i18next-http-middleware';
+import path from 'path';
 
 export const app = express();
 
@@ -54,6 +59,23 @@ app.use(compression()); // Compress responses
 // Rate limiting
 app.use(limiter); // Limit requests to prevent abuse
 
+// i18next configuration
+i18next
+  .use(Backend)
+  .use(middleware.LanguageDetector)
+  .init({
+    backend: {
+      loadPath: path.join(process.cwd(), 'src/locales', '{{lng}}', '{{ns}}.json'),
+    },
+    detection: {
+      order: ['querystring', 'cookie'],
+      caches: ['cookie'],
+    },
+    fallbackLng: 'en',
+    preload: ['en', 'mm'], // Preload all languages
+  });
+app.use(middleware.handle(i18next));
+
 app.use(express.static('public')); // Serve static files from 'public' directory
 
 // Routes
@@ -63,6 +85,7 @@ app.use(viewRoutes);
 
 app.use('/api/v1', authRoutes);
 app.use('/api/v1/admins', auth, userRoutes);
+app.use('/api/v1', profileRoutes);
 
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
