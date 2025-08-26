@@ -21,6 +21,7 @@ import {
 } from '../utils/auth';
 import { generateOTP, generateToken } from '../utils/generate';
 import { error } from 'console';
+import { errorCode } from '../../config/errorCode';
 
 /**
  * Controller for handling authentication-related requests.
@@ -41,7 +42,7 @@ export const register = [
     if (errors.length > 0) {
       const error: any = new Error(errors[0]?.msg);
       error.status = 400; // Bad Request
-      error.code = 'VALIDATION_ERROR';
+      error.code = errorCode.invalid;
       return next(error); // This passes the error to Express
     }
     let phone = req.body.phone;
@@ -92,7 +93,7 @@ export const register = [
         if (otpRow.count === 3) {
           const error: any = new Error('OTP is allowed to be requested only 3 times in a day');
           error.status = 405; // Unauthorized
-          error.code = 'OTP_LIMIT_EXCEEDED';
+          error.code = errorCode.overLimit;
           return next(error); // This passes the error to Express
         } else {
           const otpData = {
@@ -128,7 +129,7 @@ export const verifyOtp = [
     if (errors.length > 0) {
       const error: any = new Error(errors[0]?.msg);
       error.status = 400; // Bad Request
-      error.code = 'VALIDATION_ERROR';
+      error.code = errorCode.invalid;
       return next(error); // This passes the error to Express
     }
 
@@ -153,7 +154,7 @@ export const verifyOtp = [
       await updateOtp(otpRow!.id, otpData); // Update OTP row with error count
       const error: any = new Error('Token is invalid');
       error.status = 401; // Unauthorized
-      error.code = 'INVALID_TOKEN';
+      error.code = errorCode.invalid;
       return next(error); // This passes the error to Express
     }
 
@@ -162,7 +163,7 @@ export const verifyOtp = [
     if (isOtpExpired) {
       const error: any = new Error('OTP is expired');
       error.status = 403;
-      error.code = 'OTP_EXPIRED';
+      error.code = errorCode.otpExpired;
       return next(error); // This passes the error to Express
     }
 
@@ -184,7 +185,7 @@ export const verifyOtp = [
       }
       const error: any = new Error('OTP is incorrect');
       error.status = 401;
-      error.code = 'OTP_INVALID';
+      error.code = errorCode.invalid;
       return next(error); // This passes the error to Express
     }
 
@@ -225,7 +226,7 @@ export const confirmPassword = [
     if (errors.length > 0) {
       const error: any = new Error(errors[0]?.msg);
       error.status = 400; // Bad Request
-      error.code = 'VALIDATION_ERROR';
+      error.code = errorCode.invalid;
       return next(error); // This passes the error to Express
     }
 
@@ -240,7 +241,7 @@ export const confirmPassword = [
     if (otpRow?.error === 5) {
       const error: any = new Error('OTP is wrong for 5 times, please try again tomorrow');
       error.status = 400;
-      error.code = 'ERROR_BAD_REQUEST';
+      error.code = errorCode.attack;
       return next(error); // This passes the error to Express
     }
 
@@ -253,7 +254,7 @@ export const confirmPassword = [
 
       const error: any = new Error('Token is invalid');
       error.status = 400; // Unauthorized
-      error.code = 'INVALID_TOKEN';
+      error.code = errorCode.invalid;
       return next(error); // This passes the error to Express
     }
 
@@ -262,7 +263,7 @@ export const confirmPassword = [
     if (isOtpExpired) {
       const error: any = new Error('Your Request is expired. Please try again.');
       error.status = 403; // Forbidden
-      error.code = 'OTP_EXPIRED';
+      error.code = errorCode.requestExpired;
       return next(error); // This passes the error to Express
     }
 
@@ -341,7 +342,7 @@ export const login = [
     if (errors.length > 0) {
       const error: any = new Error(errors[0]?.msg);
       error.status = 400; // Bad Request
-      error.code = 'VALIDATION_ERROR';
+      error.code = errorCode.invalid;
       return next(error); // This passes the error to Express
     }
 
@@ -358,7 +359,7 @@ export const login = [
     if (user?.status === 'FREEZE') {
       const error: any = new Error('Your account is frozen. Please contact support.');
       error.status = 403; // Forbidden
-      error.code = 'ACCOUNT_FROZEN';
+      error.code = errorCode.accountFreeze;
       return next(error); // This passes the error to Express
     }
 
@@ -393,10 +394,11 @@ export const login = [
       // Ending
       const error: any = new Error('Phone number or password is incorrect');
       error.status = 401; // Unauthorized
-      error.code = 'INVALID_CREDENTIALS';
+      error.code = errorCode.invalid;
       return next(error); // This passes the error to Express
     }
 
+    // Authorization token
     // If Password matches,
     const accessTokenPayload = {
       id: user!.id,
@@ -438,6 +440,9 @@ export const login = [
       .json({
         message: 'Login successful',
         userId: user!.id,
+        // For Mobile App, remove cookies and return tokens in response
+        // accessToken,
+        // refreshToken,
       });
   },
 ];
@@ -450,7 +455,7 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
   if (!refreshToken) {
     const error: any = new Error('You are not authenticated.');
     error.status = 401; // Unauthorized
-    error.code = 'UNAUTHORIZED';
+    error.code = errorCode.unauthenticated;
     return next(error); // This passes the error to Express
   }
   let decodedToken;
@@ -462,7 +467,7 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
   } catch (err) {
     const error: any = new Error('Invalid Refresh Token');
     error.status = 400; // Bad Request
-    error.code = 'ERROR_INVALID_REFRESH_TOKEN';
+    error.code = errorCode.unauthenticated;
     return next(error); // This passes the error to Express
   }
   const user = await getUserById(decodedToken.id); // Get user by ID from the decoded token
@@ -471,7 +476,7 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
   if (user!.phone !== decodedToken.phone) {
     const error: any = new Error('You are not authenticated.');
     error.status = 401; // Unauthorized
-    error.code = 'ERROR_UNAUTHORIZED';
+    error.code = errorCode.unauthenticated;
     return next(error); // This passes the error to Express
   }
   const userData = {
@@ -479,8 +484,16 @@ export const logout = async (req: Request, res: Response, next: NextFunction) =>
   };
   await updateUser(user!.id, userData); // Update user with new token
 
-  res.clearCookie('accessToken');
-  res.clearCookie('refreshToken'); // Clear cookies
+  res.clearCookie('accessToken', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', // Adjust sameSite attribute based on environment
+  });
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', // Adjust sameSite attribute based on environment
+  }); // Clear cookies
 
   res.status(200).json({ message: 'Logout successful.' });
 };

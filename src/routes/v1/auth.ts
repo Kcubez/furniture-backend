@@ -15,4 +15,7 @@ router.post('/confirm-password', confirmPassword);
 router.post('/login', login);
 router.post('/logout', logout);
 
+// For Mobile
+// router.post('/refresh', setRefreshToken);
+
 export default router;
