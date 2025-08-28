@@ -1,6 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { body, query, validationResult } from 'express-validator';
 import { errorCode } from '../../../config/errorCode';
+import { title } from 'process';
+import { getUserById } from '../../services/authService';
+import { checkUserIfNotExists } from '../../utils/auth';
+import { authorise } from '../../utils/authorise';
 
 interface CustomRequest extends Request {
   userId?: number;
@@ -28,3 +32,22 @@ export const changeLanguage = [
     });
   },
 ];
+
+export const testPermission = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const userId = req.userId;
+  const user = await getUserById(userId!);
+  checkUserIfNotExists(user);
+
+  const info: any = {
+    title: 'Permission Test',
+  };
+
+  const can = authorise(true, user!.role, 'AUTHOR');
+  if (can) {
+    info.content = 'You have permission to read this line.';
+  }
+
+  res.status(200).json({
+    info,
+  });
+};

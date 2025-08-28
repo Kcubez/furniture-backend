@@ -6,12 +6,13 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import { limiter } from './middlewares/rateLimiter';
 import { auth } from './middlewares/auth';
+import { authorise } from './middlewares/authorise';
 import healthRoutes from './routes/v1/health';
 import authRoutes from './routes/v1/auth';
 import { Request, Response, NextFunction } from 'express';
 import viewRoutes from './routes/v1/web/view';
 // import * as errorController from './controllers/web/errorController';
-import userRoutes from './routes/v1/admin/user';
+import adminRoutes from './routes/v1/admin/user';
 import profileRoutes from './routes/v1/api/user';
 import i18next from 'i18next';
 import Backend from 'i18next-fs-backend';
@@ -84,7 +85,7 @@ app.use(viewRoutes);
 // app.use(errorController.notFound); // Handle 404 errors
 
 app.use('/api/v1', authRoutes);
-app.use('/api/v1/admins', auth, userRoutes);
+app.use('/api/v1/admins', auth, authorise(true, 'ADMIN'), adminRoutes);
 app.use('/api/v1', profileRoutes);
 
 // Error handling middleware
