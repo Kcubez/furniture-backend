@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { body, query, validationResult } from 'express-validator';
 import { errorCode } from '../../../config/errorCode';
-import { title } from 'process';
 import { getUserById } from '../../services/authService';
 import { checkUserIfNotExists } from '../../utils/auth';
 import { authorise } from '../../utils/authorise';

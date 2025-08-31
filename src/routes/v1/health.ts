@@ -1,10 +1,10 @@
-import express from 'express';
-import { check } from '../../middlewares/check';
-import { healthCheck } from '../../controllers/healthController';
+// import express from 'express';
+// import { check } from '../../middlewares/check';
+// import { healthCheck } from '../../controllers/healthController';
 
-const router = express.Router();
+// const router = express.Router();
 
-// Health check endpoint
-router.get('/health', check, healthCheck);
+// // Health check endpoint
+// router.get('/health', check, healthCheck);
 
-export default router;
+// export default router;
