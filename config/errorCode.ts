@@ -1,3 +1,5 @@
+import { maintenance } from '../src/middlewares/maintenance';
+
 export const errorCode = {
   invalid: 'Error_Invalid',
   unauthenticated: 'Error_Unauthenticated',
@@ -9,4 +11,5 @@ export const errorCode = {
   requestExpired: 'Error_RequestExpired',
   accountFreeze: 'Error_AccountFreeze',
   unauthorised: 'Error_Unauthorised',
+  maintenance: 'Error_Maintenance',
 };

@@ -21,6 +21,7 @@ import {
 } from '../utils/auth';
 import { generateOTP, generateToken } from '../utils/generate';
 import { errorCode } from '../../config/errorCode';
+import { createError } from '../utils/error';
 
 /**
  * Controller for handling authentication-related requests.
@@ -39,10 +40,7 @@ export const register = [
   async (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req).array({ onlyFirstError: true });
     if (errors.length > 0) {
-      const error: any = new Error(errors[0]?.msg);
-      error.status = 400; // Bad Request
-      error.code = errorCode.invalid;
-      return next(error); // This passes the error to Express
+      return next(createError(errors[0]?.msg, 400, errorCode.invalid));
     }
     let phone = req.body.phone;
     if (phone.slice(0, 2) == '09') {
@@ -90,10 +88,13 @@ export const register = [
         result = await updateOtp(otpRow.id, otpData); // Update existing OTP
       } else {
         if (otpRow.count === 3) {
-          const error: any = new Error('OTP is allowed to be requested only 3 times in a day');
-          error.status = 405; // Unauthorized
-          error.code = errorCode.overLimit;
-          return next(error); // This passes the error to Express
+          return next(
+            createError(
+              'OTP is allowed to be requested only 3 times in a day.',
+              405,
+              errorCode.overLimit
+            )
+          );
         } else {
           const otpData = {
             otp: hashOtp,
@@ -223,10 +224,7 @@ export const confirmPassword = [
   async (req: Request, res: Response, next: NextFunction) => {
     const errors = validationResult(req).array({ onlyFirstError: true });
     if (errors.length > 0) {
-      const error: any = new Error(errors[0]?.msg);
-      error.status = 400; // Bad Request
-      error.code = errorCode.invalid;
-      return next(error); // This passes the error to Express
+      return next(createError(errors[0]?.msg, 400, errorCode.invalid));
     }
 
     const { phone, password, token } = req.body;
@@ -260,10 +258,9 @@ export const confirmPassword = [
     // request is expired
     const isOtpExpired = moment().diff(otpRow?.updatedAt, 'minutes') > 10; // Check if OTP is older than 10 minutes
     if (isOtpExpired) {
-      const error: any = new Error('Your Request is expired. Please try again.');
-      error.status = 403; // Forbidden
-      error.code = errorCode.requestExpired;
-      return next(error); // This passes the error to Express
+      return next(
+        createError('Your Request is expired. Please try again.', 403, errorCode.requestExpired)
+      );
     }
 
     // Hash the password before saving it to the database

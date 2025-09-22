@@ -75,14 +75,6 @@ app.use(middleware.handle(i18next));
 app.use(express.static('public')); // Serve static files from 'public' directory
 
 // Routes
-// app.use('/api/v1', healthRoutes);
-// app.use(viewRoutes);
-// app.use(errorController.notFound); // Handle 404 errors
-
-// app.use('/api/v1', authRoutes);
-// app.use('/api/v1/admins', auth, authorise(true, 'ADMIN'), adminRoutes);
-// app.use('/api/v1', profileRoutes);
-
 app.use(routes);
 
 // Error handling middleware
