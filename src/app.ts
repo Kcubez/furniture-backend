@@ -8,11 +8,12 @@ import { limiter } from './middlewares/rateLimiter';
 import { Request, Response, NextFunction } from 'express';
 import routes from './routes/v1';
 // import * as errorController from './controllers/web/errorController';
-
+import cron from 'node-cron';
 import i18next from 'i18next';
 import Backend from 'i18next-fs-backend';
 import middleware from 'i18next-http-middleware';
 import path from 'path';
+import { createOrUpdateSettingStatus, getSettingStatus } from './services/settingService';
 
 export const app = express();
 
@@ -83,4 +84,13 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   const message = err.message || 'Internal Server Error';
   const errorCode = err.code || 'ERROR CODE';
   res.status(statusCode).json({ message, errorCode });
+});
+
+cron.schedule('* 5 * * *', async () => {
+  console.log('Running a task every minute');
+  const setting = await getSettingStatus('maintenance_mode');
+  if (setting?.value === 'true') {
+    await createOrUpdateSettingStatus('maintenance_mode', 'false');
+    console.log('Maintenance mode disabled by cron job');
+  }
 });

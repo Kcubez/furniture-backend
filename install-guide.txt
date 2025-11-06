@@ -15,6 +15,8 @@ npm i i18next i18next-http-middleware i18next-fs-backend
 
 npm install @faker-js/faker -D
 
+npm i node-cron @types/node-cron 
+
 ***
 https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string
 
