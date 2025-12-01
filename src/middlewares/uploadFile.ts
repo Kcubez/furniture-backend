@@ -14,8 +14,9 @@ const fileStorage = multer.diskStorage({
     } */
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + '-' + file.originalname);
+    const ext = file.mimetype.split('/')[1];
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9) + '.' + ext;
+    cb(null, uniqueSuffix);
   },
 });
 
@@ -34,7 +35,7 @@ const fileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallb
 const upload = multer({
   storage: fileStorage,
   fileFilter: fileFilter,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB file size limit
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB file size limit
 });
 
 export const uploadMemory = multer({

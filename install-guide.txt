@@ -19,6 +19,8 @@ npm i node-cron @types/node-cron
 
 npm i sharp
 
+npm i bullmq ioredis 
+brew install redis
 ***
 https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string
 
@@ -51,4 +53,4 @@ bullMQ , Redis , ioredis
 
 App ---> job ( Image Optimization Task ) ---> Queue ---> Redis <--- Worker**
 
-Boss ---> (buy me a coffee) ---> Manager ---> Bill board <--- Staff**
+Boss ---> (buy me a coffee)              ---> Manager ---> Bill board <--- Staff**
