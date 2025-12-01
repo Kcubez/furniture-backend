@@ -74,6 +74,7 @@ i18next
 app.use(middleware.handle(i18next));
 
 app.use(express.static('public')); // Serve static files from 'public' directory
+app.use(express.static('uploads/images')); // Serve static files from 'uploads' directory
 
 // Routes
 app.use(routes);

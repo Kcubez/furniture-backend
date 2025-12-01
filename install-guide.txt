@@ -17,6 +17,8 @@ npm install @faker-js/faker -D
 
 npm i node-cron @types/node-cron 
 
+npm i sharp
+
 ***
 https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string
 
