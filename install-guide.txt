@@ -21,6 +21,10 @@ npm i sharp
 
 npm i bullmq ioredis 
 brew install redis
+
+npm i sanitize-html
+npm install -D @types/sanitize-html
+
 ***
 https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string
 
