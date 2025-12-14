@@ -8,7 +8,11 @@ import {
   uploadProfileOptimize,
 } from '../../../controllers/api/profileController';
 import upload, { uploadMemory } from '../../../middlewares/uploadFile';
-import { getPost, getPostsByPagination } from '../../../controllers/api/postController';
+import {
+  getInfinitePostsByPagination,
+  getPost,
+  getPostsByPagination,
+} from '../../../controllers/api/postController';
 
 const router = express.Router();
 
@@ -22,8 +26,8 @@ router.patch('/profile/upload/optimize', auth, upload.single('avatar'), uploadPr
 
 router.patch('/profile/upload/multiple', auth, upload.array('avatar'), uploadProfileMultiple);
 
-router.get('/posts', auth, getPostsByPagination);
-
+router.get('/posts', auth, getPostsByPagination); //Offset Pagination
+router.get('/posts/infinite', auth, getInfinitePostsByPagination); //Infinite Scroll Pagination
 router.get('/posts/:id', auth, getPost);
 
 export default router;

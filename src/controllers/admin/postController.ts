@@ -240,7 +240,7 @@ export const updatePost = [
 ];
 
 export const deletePost = [
-  body('postId', 'Post ID is required').trim().notEmpty().isInt({ min: 1 }),
+  body('postId', 'Post ID is required').isInt({ gt: 0 }),
   async (req: CustomRequest, res: Response, next: NextFunction) => {
     const errors = validationResult(req).array({ onlyFirstError: true });
     if (errors.length > 0) {
