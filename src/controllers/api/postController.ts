@@ -1,13 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
-import { body, param, query, validationResult } from 'express-validator';
+import { param, query, validationResult } from 'express-validator';
 import { errorCode } from '../../../config/errorCode';
 import { checkUserIfNotExists } from '../../utils/auth';
-import { checkUploadFile } from '../../utils/check';
 import { createError } from '../../utils/error';
 import { getUserById } from '../../services/authService';
 import { getPostById, getPostsList, getPostWithRelations } from '../../services/postService';
-import { auth } from '../../middlewares/auth';
-import { title } from 'process';
+import { getOrSetCache } from '../../utils/cache';
 
 interface CustomRequest extends Request {
   userId?: number;
@@ -28,7 +26,11 @@ export const getPost = [
     const user = await getUserById(userId!);
     checkUserIfNotExists(user);
 
-    const post = await getPostWithRelations(+postId!); // "7" -> 7
+    // const post = await getPostWithRelations(+postId!); // "7" -> 7
+    const cacheKey = `posts:${JSON.stringify(+postId!)}`;
+    const post = await getOrSetCache(cacheKey, async () => {
+      return await getPostWithRelations(+postId!);
+    });
 
     // const modifiedPost = {
     //   id: post?.id,
@@ -95,7 +97,11 @@ export const getPostsByPagination = [
       },
     };
 
-    const posts = await getPostsList(options);
+    // const posts = await getPostsList(options);
+    const cacheKey = `posts:${JSON.stringify(req.query)}`;
+    const posts = await getOrSetCache(cacheKey, async () => {
+      return await getPostsList(options);
+    });
 
     const hasNextPage = posts.length > Number(limit); //6>5 true //
     let nextPage = null;
@@ -155,7 +161,11 @@ export const getInfinitePostsByPagination = [
       },
     };
 
-    const posts = await getPostsList(options);
+    // const posts = await getPostsList(options);
+    const cacheKey = `posts:${JSON.stringify(req.query)}`;
+    const posts = await getOrSetCache(cacheKey, async () => {
+      return await getPostsList(options);
+    });
 
     const hasNextPage = posts.length > Number(limit); //6>5 true //
     if (hasNextPage) {
