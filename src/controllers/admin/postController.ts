@@ -20,6 +20,7 @@ import cacheQueue from '../../jobs/queues/cacheQueue';
 
 interface CustomRequest extends Request {
   userId?: any;
+  user?: any;
 }
 
 const removeFiles = async (originalFile: string, optimizedFile: string | null) => {
@@ -88,17 +89,18 @@ export const createPost = [
 
     // Additional logic for creating a post goes here
     const { title, content, body, category, type, tags } = req.body;
-    const userId = req.userId;
+    // const userId = req.userId;
+    const user = req.user;
     checkUploadFile(req.file);
-    const user = await getUserById(userId!);
-    if (!user) {
-      if (req.file) {
-        await removeFiles(req.file.filename, null);
-      }
-      return next(
-        createError('User not found with this phone number', 401, errorCode.unauthenticated)
-      );
-    }
+    // const user = await getUserById(userId!);
+    // if (!user) {
+    //   if (req.file) {
+    //     await removeFiles(req.file.filename, null);
+    //   }
+    //   return next(
+    //     createError('User not found with this phone number', 401, errorCode.unauthenticated)
+    //   );
+    // }
 
     const splitFileName = req.file!.filename.split('.')[0];
 
@@ -179,16 +181,17 @@ export const updatePost = [
 
     // Additional logic for creating a post goes here
     const { postId, title, content, body, category, type, tags } = req.body;
-    const userId = req.userId;
-    const user = await getUserById(userId!);
-    if (!user) {
-      if (req.file) {
-        await removeFiles(req.file.filename, null);
-      }
-      return next(
-        createError('User not found with this phone number', 401, errorCode.unauthenticated)
-      );
-    }
+    const user = req.user;
+    // const userId = req.userId;
+    // const user = await getUserById(userId!);
+    // if (!user) {
+    //   if (req.file) {
+    //     await removeFiles(req.file.filename, null);
+    //   }
+    //   return next(
+    //     createError('User not found with this phone number', 401, errorCode.unauthenticated)
+    //   );
+    // }
 
     const post = await getPostById(+postId); // "7" -> 7
     if (!post) {
@@ -268,9 +271,10 @@ export const deletePost = [
 
     // Additional logic for creating a post goes here
     const { postId } = req.body;
-    const userId = req.userId;
-    const user = await getUserById(userId!);
-    checkUserIfNotExists(user);
+    // const userId = req.userId;
+    // const user = await getUserById(userId!);
+    // checkUserIfNotExists(user);
+    const user = req.user;
 
     const post = await getPostById(+postId); // "7" -> 7
     checkModelIfExist(post);
