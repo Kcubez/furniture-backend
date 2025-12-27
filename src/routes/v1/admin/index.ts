@@ -5,8 +5,8 @@ import upload from '../../../middlewares/uploadFile';
 import { createPost, updatePost, deletePost } from '../../../controllers/admin/postController';
 import {
   createProduct,
-  //   deleteProduct,
-  //   updateProduct,
+  updateProduct,
+  deleteProduct,
 } from '../../../controllers/admin/productController';
 
 const router = express.Router();
@@ -22,7 +22,7 @@ router.delete('/posts', deletePost);
 
 // CRUD for products
 router.post('/products', upload.array('images', 4), createProduct);
-// router.patch('/products', upload.array('images', 4), updateProduct);
-// router.delete('/products', deleteProduct);
+router.patch('/products', upload.array('images', 4), updateProduct);
+router.delete('/products', deleteProduct);
 
 export default router;

@@ -152,7 +152,7 @@ export const createPost = [
 ];
 
 export const updatePost = [
-  body('postId', 'Post ID is required').trim().notEmpty().isInt({ min: 1 }),
+  body('postId', 'Post ID is required').isInt({ min: 1 }),
   body('title', 'Title is required').trim().notEmpty().escape(),
   body('content', 'content is required').trim().notEmpty().escape(),
   body('body', 'body is required')
