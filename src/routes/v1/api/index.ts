@@ -13,6 +13,7 @@ import {
   getPost,
   getPostsByPagination,
 } from '../../../controllers/api/postController';
+import { getProduct, getProductsByPagination } from '../../../controllers/api/productController';
 
 const router = express.Router();
 
@@ -29,5 +30,8 @@ router.patch('/profile/upload/multiple', auth, upload.array('avatar'), uploadPro
 router.get('/posts', auth, getPostsByPagination); //Offset Pagination
 router.get('/posts/infinite', auth, getInfinitePostsByPagination); //Infinite Scroll Pagination
 router.get('/posts/:id', auth, getPost);
+
+router.get('/products/:id', auth, getProduct);
+router.get('/products', auth, getProductsByPagination);
 
 export default router;

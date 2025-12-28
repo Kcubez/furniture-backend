@@ -1,11 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
-import { param, query, validationResult } from 'express-validator';
+import { check, param, query, validationResult } from 'express-validator';
 import { errorCode } from '../../../config/errorCode';
 import { checkUserIfNotExists } from '../../utils/auth';
 import { createError } from '../../utils/error';
 import { getUserById } from '../../services/authService';
 import { getPostById, getPostsList, getPostWithRelations } from '../../services/postService';
 import { getOrSetCache } from '../../utils/cache';
+import { checkModelIfExist } from '../../utils/check';
 
 interface CustomRequest extends Request {
   userId?: number;
@@ -31,6 +32,8 @@ export const getPost = [
     const post = await getOrSetCache(cacheKey, async () => {
       return await getPostWithRelations(+postId!);
     });
+
+    checkModelIfExist(post);
 
     // const modifiedPost = {
     //   id: post?.id,
