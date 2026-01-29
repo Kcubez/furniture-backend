@@ -73,6 +73,11 @@ i18next
   });
 app.use(middleware.handle(i18next));
 
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
+  next();
+});
+
 app.use(express.static('public')); // Serve static files from 'public' directory
 app.use(express.static('uploads')); // Serve static files from 'uploads' directory
 

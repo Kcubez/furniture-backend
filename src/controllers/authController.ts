@@ -306,6 +306,7 @@ export const confirmPassword = [
         secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', // Adjust sameSite attribute based on environment
         maxAge: 15 * 60 * 1000, // 15 minutes
+        path: '/',
       })
       .cookie('refreshToken', refreshToken, {
         httpOnly: true,
@@ -781,3 +782,20 @@ export const resetPassword = [
       });
   },
 ];
+
+interface CustomRequest extends Request {
+  userId?: number;
+}
+
+export const authCheck = async (req: CustomRequest, res: Response, next: NextFunction) => {
+  const userId = req.userId;
+  const user = await getUserById(userId!);
+  checkUserIfNotExists(user);
+
+  res.status(200).json({
+    message: 'You are authenticated.',
+    userId: user!.id,
+    username: user!.firstName + ' ' + user!.lastName,
+    image: user!.image,
+  });
+};
